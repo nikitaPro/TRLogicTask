@@ -11,8 +11,14 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class HomeController {
 
-	@RequestMapping(value="/")
-	public ModelAndView test(HttpServletResponse response) throws IOException{
-		return new ModelAndView("home");
-	}
+    @RequestMapping(value="/home")
+    public ModelAndView homePage(HttpServletResponse response) throws IOException{
+        return new ModelAndView("home");
+    }
+
+    @RequestMapping(value="/signin")
+    public ModelAndView signIn(HttpServletResponse response) throws IOException{
+        return new ModelAndView("home");
+    }
+	
 }
