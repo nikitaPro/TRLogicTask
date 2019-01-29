@@ -6,10 +6,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 @SuppressWarnings("serial")
-public class UserDetails extends User {
+public class TRLogicUserDetails extends User {
     private long userId;
 
-    public UserDetails(long userId,
+    public TRLogicUserDetails(long userId,
                              String username,
                              String password,
                              boolean enabled,
@@ -21,7 +21,7 @@ public class UserDetails extends User {
         this.userId = userId;
     }
 
-    public long getPlayerId() {
+    public long getUserId() {
         return userId;
     }
 }

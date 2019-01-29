@@ -1,5 +1,10 @@
 $(document).ready(function () {
     var $tabs = $('#sign_board').tabs();
+    $("#sign_board").position({
+        my: "center",  // position on the positioned element
+        at: "center",  // place on the element relative to which will be positioning
+        of: "body"        // element relative to which will be positioning
+    });
     $("#sign_up_btn").click(function(event) {
         signUp();
     });
@@ -25,7 +30,8 @@ function errorDialog(title_, message, elementForFocus) {
 function isEmailValid(email) {
     if (email.match(/^.+@.+\..+$/) == null) {
         errorDialog("E-mail format", 
-                "Email is invalid! Must look like example@example.com",
+                "Invalid email format. Please, check your email, " +
+                "it must look like example@example.com",
                 $('#email'));
         return false;
     }
@@ -35,7 +41,8 @@ function isEmailValid(email) {
 function isPhoneValid(phone) {
     if (phone.match(/^\+\d\d\(\d{3}\)\d{3}\-\d\d\-\d\d$/) == null) {
         errorDialog("Phone format", 
-                "Phone is invalid! Must look like +00(000)000-00-00",
+                "Invalid phone number format. Please, check your phone number, " +
+                "it must look like +00(000)000-00-00",
                 $('#phone'));
         return false;
     }

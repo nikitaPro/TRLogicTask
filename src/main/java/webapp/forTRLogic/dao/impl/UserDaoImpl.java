@@ -1,8 +1,11 @@
 package webapp.forTRLogic.dao.impl;
 
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +17,7 @@ import webapp.forTRLogic.dao.UserDao;
 
 @Repository
 @Qualifier("userDao")
-public class UserDaoImpl implements UserDao{
+public class UserDaoImpl implements UserDao {
     private static final Logger LOG = Logger.getLogger(UserDaoImpl.class);
     
     private static final String PROBLEM_MESSAGE = "Sorry, server problem, try repeat later.";
@@ -49,9 +52,39 @@ public class UserDaoImpl implements UserDao{
     }
 
     @Override
-    public User getUser(long userId) {
-        // TODO Auto-generated method stub
-        return null;
+    public User getUserById(long userId) {
+        Map<String, Object> row = jdbcTemplate.queryForMap(Query.SELECT_USER_BY_ID,
+                new Object[]{userId});
+        User user = new User(userId, 
+                row.get("name").toString(), 
+                row.get("lastname").toString(),  
+                row.get("phone").toString(),
+                row.get("email").toString());
+        return user;
     }
-    
+
+    @Override
+    public User getUserByEmail(String email) {
+        Map<String, Object> row;
+        try {
+            row = jdbcTemplate.queryForMap(Query.SELECT_USER_BY_EMAIL,
+                    new Object[] { email });
+        } catch (EmptyResultDataAccessException e){
+            return null;
+        }
+        User user = new User((Long)row.get("id"), 
+                row.get("name").toString(), 
+                row.get("lastname").toString(), 
+                row.get("phone").toString(), 
+                email);
+        return user;
+    }
+
+    @Override
+    public String getUserPasswordById(long id) {
+        String pass = jdbcTemplate.queryForObject(Query.SELECT_USER_PASSWORD_BY_ID,
+                new Object[] { id }, String.class);
+        return pass;
+    }
+
 }

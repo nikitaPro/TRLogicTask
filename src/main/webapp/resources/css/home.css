@@ -1,20 +1,6 @@
-body {
-
-    background-image:url("../images/night_city.jpg");
-    
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: fixed;
-    
-}
 
 #sign_board {
 	width: 40%;
     max-width: 600px;
     min-width: 350px;
-    
-    top: 20%;
-    left: 30%;
-    right: 30%;
 }

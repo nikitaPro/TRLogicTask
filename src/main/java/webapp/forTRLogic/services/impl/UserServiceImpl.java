@@ -1,6 +1,10 @@
 package webapp.forTRLogic.services.impl;
 
+import java.util.ArrayList;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,16 +13,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import webapp.forTRLogic.bean.NewUser;
 import webapp.forTRLogic.bean.Status;
+import webapp.forTRLogic.bean.TRLogicUserDetails;
+import webapp.forTRLogic.bean.User;
 import webapp.forTRLogic.dao.UserDao;
 import webapp.forTRLogic.services.UserService;
 
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
-    private static final String INVALID_PASS = "Password is invalid! \nPlease, enter password in 8-20 length range.";
-    private static final String CONFIRM_PASS_FAIL = "Passwords are not matching!";
-    private static final String INVALID_EMAIL = "Invalid email format! Must look like example@example.com";
-    private static final String INVALID_PHONE = "Invalid phone format! Must look like +00(000)000-00-00";
+    private static final Logger LOG = Logger.getLogger(UserServiceImpl.class); 
+    
+    private static final String USER_ALREADY_EXIST = "Sorry, but this email address already registered.";
+    private static final String INVALID_PASS = "Password is invalid. \nPlease, enter password in 8-20 length range.";
+    private static final String CONFIRM_PASS_FAIL = "Passwords are not matching.";
+    private static final String INVALID_EMAIL = "Invalid email format. Please, check your email, it must look like example@example.com";
+    private static final String INVALID_PHONE = "Invalid phone number format. Please, check your phone number, it must look like +00(000)000-00-00";
 
     @Autowired
     private UserDao userDao;
@@ -27,23 +36,55 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userDao.getUserByEmail(email);
+        if (user == null) {
+            UsernameNotFoundException ex = new UsernameNotFoundException("User with email [" + email + "] not found.");
+            LOG.error("User not registered", ex);
+            throw ex;
+        }
+        LOG.debug("User " + email + " try signed in");
+        
+        ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        
+        return new TRLogicUserDetails(user.getId(), 
+                email, 
+                userDao.getUserPasswordById(user.getId()), 
+                true, true, true, true, 
+                authorities);
     }
 
     @Override
     public Status signUp(NewUser newUser, String pass, String passConfirm) {
+        if (userDao.getUserByEmail(newUser.getEmail()) != null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("User with email [" + newUser.getEmail() + "] already exist.");
+            }
+            return new Status(USER_ALREADY_EXIST, false);
+        }
         if (!isEmailValid(newUser.getEmail())) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid email format " + newUser.getEmail());
+            }
             return new Status(INVALID_EMAIL, false);
         }
         if (!isPasswordValid(pass)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid pass length");
+            }
             return new Status(INVALID_PASS, false);
         }
         if (!isPasswordMatching(pass, passConfirm)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid password matching");
+            }
             return new Status(CONFIRM_PASS_FAIL, false);
         }
         if (!isPhoneValid(newUser.getPhone())) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid phone format " + newUser.getPhone());
+            }
             return new Status(INVALID_PHONE, false);
         }
         
@@ -75,5 +116,11 @@ public class UserServiceImpl implements UserService {
     
     private boolean isPhoneValid(String phone) {
         return phone != null && phone.matches("(^\\+\\d\\d\\(\\d{3}\\)\\d{3}\\-\\d\\d\\-\\d\\d$)");
+    }
+
+    @Override
+    public User getUserData(long id) {
+        User user = userDao.getUserById(id);
+        return user;
     }
 }

@@ -29,14 +29,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
         http.csrf()
                 .disable()
                 // specify query rules
                 // which will determine access to resources and other data
                 .authorizeRequests()
-                .antMatchers("/resources/**").permitAll()
+                .antMatchers("/jQuery/**").permitAll()
+                .antMatchers("/images/**").permitAll()
+                .antMatchers("/js/**").permitAll()
+                .antMatchers("/css/**").permitAll()
                 .antMatchers("/home").permitAll()
+                .antMatchers("/signin").permitAll()
+                .antMatchers("/signup").permitAll()
                 .antMatchers("/**").access("hasRole('ROLE_USER')")
                 .and();
 
@@ -46,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // specify the "action" from the login form
                 .loginProcessingUrl("/signin")
                 // specify URL when login failed
-                .failureUrl("/home?error=\"Wrong email or password\"")
+                .failureUrl("/signin?error=\"Wrong email or password\"")
                 .defaultSuccessUrl("/profile", true)
                 // Specify login and password parameters from the login form
                 .usernameParameter("email")
@@ -59,9 +63,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // allow everyone to log out
                 .permitAll()
                 // specify the URL of the logout
-                .logoutUrl("/logout")
+                .logoutUrl("/signin?logout=\"You've been logged out successfully.\"")
                 // specify the URL when successful logout
-                .logoutSuccessUrl("/home")
+                .logoutSuccessUrl("/signin")
                 // make the current session invalid
                 .invalidateHttpSession(true);
 
