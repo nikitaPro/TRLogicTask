@@ -1,8 +1,16 @@
 package webapp.forTRLogic.bean;
 
-import java.math.BigInteger;
 
 public class User extends NewUser {
+    protected long id;
+    
+    public User(long id, String name, String lastName, String phone, String email) {
+        super(name, lastName, phone, email);
+        this.id = id;
+    }
 
-    protected BigInteger id;
+    public long getId() {
+        return id;
+    }
+
 }

@@ -1,11 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
   <head>
+    <link rel="icon" href=<c:url value="/images/favicon.ico?v=2"/> />
     <link href=<c:url value="/css/jquery-ui.min.css"/>  rel="stylesheet" media="screen">
     <link href=<c:url value="/css/home.css"/>  rel="stylesheet" media="screen">
     <script src=<c:url value="/jQuery/jquery.min.js"/> ></script>
     <script src=<c:url value="/jQuery/jquery-ui.min.js"/> ></script>
     <script src=<c:url value="/js/home.js"/> ></script>
+    <script src=<c:url value="/jQuery/jquery.mask.min.js"/> ></script>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Home</title>
   </head>
@@ -16,7 +18,7 @@
         <li><a href="#sign_up">Sign up</a></li>
       </ul>
         <div id="sign_in">
-          <form name='login_form' action="<c:url value="signin" />" method="POST">
+          <form name='login_form' action="<c:url value="/signin" />" method="POST">
             <table>
               <tr align="center">
                 <td><input type="text" name="email" placeholder="E-mail"/></td>
@@ -41,7 +43,10 @@
                 <td><input id = "user_name"  type="text" name="username" placeholder="Name"/></td>
               </tr>
               <tr align="center">
-                <td><input id = "last_name"  type="text" name="lastname" placeholder="Name"/></td>
+                <td><input id = "last_name"  type="text" name="lastname" placeholder="Last name"/></td>
+              </tr>
+              <tr align="center">
+                <td><input id = "phone" type="text" name="phone" placeholder="Phone"/></td>
               </tr>
               <tr align="center">
                 <td><input id = "email" type="text" name="email" placeholder="E-mail"/></td>
@@ -55,7 +60,7 @@
               <tr align="center">
                 <td>
                   <button id = "sign_up_btn" class="ui-button" 
-                  name="button" type="button" value="Register" onclick="register()">
+                  name="button" type="button" value="Register">
                     Sign up
                  </button>
                 </td>
@@ -63,6 +68,9 @@
             </table>
           </form>
         </div>
+      </div>
+      <div id="error_dialog" hidden="hidden">
+
       </div>
     </body>
 </html>
