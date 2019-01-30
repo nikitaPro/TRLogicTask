@@ -1,16 +1,19 @@
 package webapp.forTRLogic.bean;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NewUser {
 
     protected String name;
     protected String lastName;
-    protected String phone;
+    protected List<String> phones;
     protected String email;
      
-    public NewUser(String name, String lastName, String phone, String email) {
+    public NewUser(String name, String lastName, String email) {
         this.name = name;
         this.lastName = lastName;
-        this.phone = phone;
+        this.phones = new ArrayList<>();
         this.email = email;
     }
     
@@ -22,12 +25,20 @@ public class NewUser {
         return lastName;
     }
     
-    public String getPhone() {
-        return phone;
+    public List<String> getPhones() {
+        return phones;
+    }
+    
+    public void addPhone(String phone) {
+        phones.add(phone);
     }
     
     public String getEmail() {
         return email;
+    }
+
+    public void setPhones(List<String> phones) {
+        this.phones = phones;
     }
     
 }

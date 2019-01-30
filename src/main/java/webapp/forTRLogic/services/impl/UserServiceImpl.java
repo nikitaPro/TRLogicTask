@@ -35,16 +35,19 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     
+    /* This method invoke by spring security when user try signed in */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        /* Retrieve user from database */
+        LOG.debug("User " + email + " try to sign in");
         User user = userDao.getUserByEmail(email);
         if (user == null) {
             UsernameNotFoundException ex = new UsernameNotFoundException("User with email [" + email + "] not found.");
             LOG.error("User not registered", ex);
             throw ex;
         }
-        LOG.debug("User " + email + " try signed in");
         
+        /* Granting role to this user */
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         
@@ -57,33 +60,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Status signUp(NewUser newUser, String pass, String passConfirm) {
+        /* Checking whether the same user are in the system */
         if (userDao.getUserByEmail(newUser.getEmail()) != null) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("User with email [" + newUser.getEmail() + "] already exist.");
             }
             return new Status(USER_ALREADY_EXIST, false);
         }
+        
         if (!isEmailValid(newUser.getEmail())) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid email format " + newUser.getEmail());
             }
             return new Status(INVALID_EMAIL, false);
         }
+        
         if (!isPasswordValid(pass)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid pass length");
             }
             return new Status(INVALID_PASS, false);
         }
+        
         if (!isPasswordMatching(pass, passConfirm)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid password matching");
             }
             return new Status(CONFIRM_PASS_FAIL, false);
         }
-        if (!isPhoneValid(newUser.getPhone())) {
+        
+        // Get first element because only one phone number take part in sign up procedure
+        String phone = newUser.getPhones().get(0);
+        if (!isPhoneValid(phone)) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid phone format " + newUser.getPhone());
+                LOG.debug("Invalid phone format " + phone);
             }
             return new Status(INVALID_PHONE, false);
         }

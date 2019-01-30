@@ -50,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // specify the "action" from the login form
                 .loginProcessingUrl("/signin")
                 // specify URL when login failed
-                .failureUrl("/signin?error=\"Wrong email or password\"")
+                .failureUrl("/home?error=Wrong email or password")
                 .defaultSuccessUrl("/profile", true)
                 // Specify login and password parameters from the login form
                 .usernameParameter("email")
@@ -63,9 +63,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // allow everyone to log out
                 .permitAll()
                 // specify the URL of the logout
-                .logoutUrl("/signin?logout=\"You've been logged out successfully.\"")
+                .logoutUrl("/logout")
                 // specify the URL when successful logout
-                .logoutSuccessUrl("/signin")
+                .logoutSuccessUrl("/home?logout=You've been logged out successfully.")
                 // make the current session invalid
                 .invalidateHttpSession(true);
 

@@ -1,5 +1,10 @@
 package webapp.forTRLogic.bean;
 
+/**
+ * Class with two fields: <code>success</code>(true/false) 
+ * for mark status like success/error and <code>message</code> 
+ * for success or error info.
+ * */
 public class Status {
     
     protected String message;
@@ -14,6 +19,5 @@ public class Status {
     public boolean isSuccess() {
         return success;
     }
-    
     
 }

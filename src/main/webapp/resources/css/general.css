@@ -8,3 +8,15 @@ body {
     background-attachment: fixed;
     
 }
+
+.errorText {
+	color: rgb(179, 0, 0);
+}
+
+.messageText {
+	color: white;
+}
+
+.successText {
+	color: rgb(0, 153, 51);
+}

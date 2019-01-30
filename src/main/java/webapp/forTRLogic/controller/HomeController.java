@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,30 +28,37 @@ import webapp.forTRLogic.services.UserService;
 
 @Controller
 public class HomeController {
+    private static final Logger LOG = Logger.getLogger(HomeController.class); 
     
     @Autowired
     private UserService userService;
     
-
-    @RequestMapping(value="/")
-    public ModelAndView redirectToHome() {
-        return new ModelAndView("redirect:/home");
-    }
-    
-    @RequestMapping(value="/home")
-    public ModelAndView homePage() {
-        return new ModelAndView("home");
-    }
-    
+    /**This is the entry point for an authorized user.*/
     @Secured("ROLE_USER")
     @RequestMapping(value="/profile", method = RequestMethod.GET)
-    public ModelAndView signIn(@AuthenticationPrincipal TRLogicUserDetails userDetails) throws IOException {
-        User userInfo = userService.getUserData(userDetails.getUserId());
-        ModelAndView page = new ModelAndView("profile");
-        page.addObject("userInfo", userInfo);
-        return page;
+    public ModelAndView profile(@AuthenticationPrincipal TRLogicUserDetails userDetails) throws IOException {
+        MDC.put("userName", userDetails.getUsername());
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("signed in.");
+            }
+            
+            User userInfo = userService.getUserData(userDetails.getUserId());
+            
+            ModelAndView page = new ModelAndView("profile");
+            page.addObject("userInfo", userInfo);
+            return page;
+            
+        } finally {
+            MDC.remove("userName");
+        }
     }
     
+    /**
+     * This method registered user in system
+     * @return status in json format.
+     * @see webapp.forTRLogic.bean.Status
+     * */
     @RequestMapping(value="/signup", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<String> signup (
@@ -64,7 +70,9 @@ public class HomeController {
             @RequestParam(value = "pass_confirm") String passConfirm) throws JsonProcessingException {
         MDC.put("userName", email);
         try {
-            NewUser newUser = new NewUser(name, lastName, phone, email);
+            NewUser newUser = new NewUser(name, lastName, email);
+            newUser.addPhone(phone);
+            
             Status status = userService.signUp(newUser, pass, passConfirm);
             
             Map<String, Object> resp = new HashMap<>();
@@ -79,18 +87,28 @@ public class HomeController {
         }
     }
     
-    @RequestMapping(value = "/signin", method = RequestMethod.GET)
-    public ModelAndView protectedPage(
+    /**
+     * Entry point for everyone
+     * @return home page view
+     * */
+    @RequestMapping(value = "/home", method = RequestMethod.GET)
+    public ModelAndView homePage(
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "logout", required = false) String logout) {
 
         ModelAndView model = new ModelAndView("home");
         if (error != null) {
             model.addObject("error", error);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(error);
+            }
         }
 
         if (logout != null) {
             model.addObject("logout", logout);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("logged out.");
+            }
         }
 
         return model;

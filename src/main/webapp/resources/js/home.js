@@ -1,16 +1,27 @@
 $(document).ready(function () {
+    /* Do "sign in" and "sign up" tabs */
     var $tabs = $('#sign_board').tabs();
-    $("#sign_board").position({
-        my: "center",  // position on the positioned element
-        at: "center",  // place on the element relative to which will be positioning
-        of: "body"        // element relative to which will be positioning
-    });
+    
+    /* Set position of tabs panel on center of page */
+    setPageContentPositionCenter($('#sign_board'));
+    /* Reset position of tabs panel when screen size changed (mobile devices) */
+    window.addEventListener("resize", function() {
+        setPageContentPositionCenter($('#sign_board'));
+    }, false);
+    
     $("#sign_up_btn").click(function(event) {
         signUp();
     });
     $("#phone").mask('+00(000)000-00-00');
+    /* Allow jQuery tooltip */
+    $( document ).tooltip();
 });
 
+/* 
+ * Make dialog with message and OK button. 
+ * elementForFocus - the element with problem for which the dialog was called
+ * Focus will return to this problem element. 
+ * */
 function errorDialog(title_, message, elementForFocus) {
     $("#error_dialog").dialog({
         resizable:false,
@@ -20,8 +31,23 @@ function errorDialog(title_, message, elementForFocus) {
           "Ok": function(){
             $(this).dialog( "close" );
             if (elementForFocus != null) {
+                /* Return focus to the problem element */
                 elementForFocus.focus();
             }
+          }
+        }
+      }).html(message);
+}
+
+/* Make dialog with message and OK button for normal situations */
+function messageDialog(title_, message) {
+    $("#message_dialog").dialog({
+        resizable:false,
+        title:title_,
+        modal:true,
+        buttons:{
+          "Ok": function(){
+            $(this).dialog( "close" );
           }
         }
       }).html(message);
@@ -49,20 +75,57 @@ function isPhoneValid(phone) {
     return true
 }
 
+function isNameValid(fieldName, text, forFocus) {
+    var err;
+    var title = fieldName + " format";
+    if (text.length > 40) {
+        errorDialog(title, 
+                "Invalid " + fieldName + " format.\n" +
+                "The name can be up to 40 characters.",
+                forFocus);
+        return false;
+    }
+    if (text.match(/^[a-zA-Z\-]+$/) == null) {
+        errorDialog(title, 
+                "Invalid " + fieldName + " format.\n" +
+                "Please use only latin characters and '-'.",
+                forFocus);
+        return false;
+    }
+    return true;
+}
+
+/* After successful registration all fields must be cleared. */
+function cleanSignUpForm() {
+    $("#user_name").val("");
+    $("#last_name").val("");
+    $("#email").val("");
+    $("#phone").val("");
+    $("#pass").val("");
+    $("#pass_2").val("");
+}
+
 function signUp() {
     var nameVar = $("#user_name").val();
-    var lastName = $("#last_name").val()
+    var lastName = $("#last_name").val();
     var emailVar = $("#email").val();
     var phoneVar = $("#phone").val();
     var passVar = $("#pass").val();
     var pass2Var = $("#pass_2").val();
     
+    /* ===== Validation part ===== */
     if (nameVar == null || nameVar.trim() == "") {
         errorDialog("Name", "Please, enter your name.", $("#user_name"));
         return;
     }
+    if (!isNameValid("Name", nameVar, $("#user_name"))) {
+        return;
+    }
     if (lastName == null || lastName.trim() == "") {
         errorDialog("Last name", "Please, enter your last name.", $("#last_name"))
+        return;
+    }
+    if (!isNameValid("Last name", lastName, $("#last_name"))) {
         return;
     }
     if (!isEmailValid(emailVar)) {
@@ -81,6 +144,16 @@ function signUp() {
         errorDialog("Password", "Passwords are not matching.", $("#pass_2"));
         return;
     }
+    
+    function serverProblemError() {
+        errorDialog("Error", 
+                "We apologize, there are problems on the server, " +
+                "please try again later.", 
+                null);
+    }
+    
+    /* ===== Validation part finish ===== */
+    /* Sending user data on server */
     $.get("/forTRLogic/signup", {
         name: nameVar,
         last_name: lastName,
@@ -89,22 +162,27 @@ function signUp() {
         pass: passVar,
         pass_confirm: pass2Var
     }).done(function(response, status, xhr) {
-                
+        /* 
+         * If server return some technical page with stack trace to the 
+         * client side 
+         * */
         var n = response.search(/<html>/i);
-        if (n != -1) window.location.href = "/home";
+        if (n != -1) {
+            serverProblemError();
+            return;
+        }
         
         var jsonObj = JSON.parse(response);
 
         if (jsonObj.status.success) {
-            errorDialog("Welcome", jsonObj.status.message, null);
+            messageDialog("Welcome", jsonObj.status.message, null);
+            cleanSignUpForm();
         } else {
             errorDialog("Warning", jsonObj.status.message, null);
         }
         
     }).fail(function(xhr, status, error) {
-        errorDialog("Error", 
-                "We apologize, there are problems on the server, " +
-                "please try again later.", 
-                null);
+        serverProblemError();
     });
+    
 }

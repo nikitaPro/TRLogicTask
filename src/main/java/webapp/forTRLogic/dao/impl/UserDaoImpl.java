@@ -1,5 +1,7 @@
 package webapp.forTRLogic.dao.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -27,25 +29,28 @@ public class UserDaoImpl implements UserDao {
     
     @Override
     public Status addNewUser(NewUser user, String pass) {
+        long id;
         int rowsAffected;
         try {
-            rowsAffected = jdbcTemplate.update(Query.INSERT_NEW_USER,
-                    new Object[] { user.getName(),
+            id = jdbcTemplate.queryForObject(Query.INSERT_NEW_USER,
+                    new Object[] {user.getName(),
                             user.getLastName(),
-                            user.getPhone(),
                             user.getEmail(),
-                            pass });
+                            pass},
+                    Long.class);
+            rowsAffected = jdbcTemplate.update(Query.INSERT_USER_PHONE, 
+                    new Object[] {id, user.getPhones().get(0)});
         } catch (Exception e) {
             LOG.error("User wasn't signed up.", e);
             return new Status(PROBLEM_MESSAGE, false);
         }
         
         if (rowsAffected == 0) {
-            LOG.error("User wasn't signed up. Database returned \"0 rows was added\".");
+            LOG.error("User's phone wasn't wrote down. Database returned \"0 rows was added\".");
             return new Status(PROBLEM_MESSAGE, false);
         } else {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("User was wrote down into database.");
+                LOG.debug("User's phone was wrote down into database.");
             }
             return new Status("Success. Sign in please.", true);
         }
@@ -58,8 +63,8 @@ public class UserDaoImpl implements UserDao {
         User user = new User(userId, 
                 row.get("name").toString(), 
                 row.get("lastname").toString(),  
-                row.get("phone").toString(),
                 row.get("email").toString());
+        user.setPhones(getPhonesById(userId));
         return user;
     }
 
@@ -72,12 +77,24 @@ public class UserDaoImpl implements UserDao {
         } catch (EmptyResultDataAccessException e){
             return null;
         }
-        User user = new User((Long)row.get("id"), 
+        long userId = (Long)row.get("id");
+        User user = new User(userId, 
                 row.get("name").toString(), 
                 row.get("lastname").toString(), 
-                row.get("phone").toString(), 
                 email);
+
+        user.setPhones(getPhonesById(userId));
         return user;
+    }
+    
+    @Override
+    public List<String> getPhonesById(long id) {
+        List<String> returnigPhones = new ArrayList<String>();
+        List<Map<String, Object>> phones = jdbcTemplate.queryForList(Query.SELECT_USERS_PHONES_BY_ID, new Object[]{id});
+        for (Map<String, Object> row_2 : phones) {
+            returnigPhones.add(row_2.get("phone").toString());
+        }
+        return returnigPhones;
     }
 
     @Override

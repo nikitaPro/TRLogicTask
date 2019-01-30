@@ -7,9 +7,10 @@
     <link href=<c:url value="/css/general.css"/>  rel="stylesheet" media="screen">
     <script src=<c:url value="/jQuery/jquery.min.js"/> ></script>
     <script src=<c:url value="/jQuery/jquery-ui.min.js"/> ></script>
+    <script src=<c:url value="/js/general.js"/> ></script>
     <script src=<c:url value="/js/profile.js"/> ></script>
     <script src=<c:url value="/jQuery/jquery.mask.min.js"/> ></script>
-    <title>Home</title>
+    <title>Profile</title>
   </head>
   <body>
     <table id="outer-table" cellspacing="10" cellpadding="5" >
@@ -32,12 +33,22 @@
                 <td>Email:</td><td id="email">${userInfo.email}</td>
               </tr>
               <tr>
-                <td>Phone:</td><td id="phone">${userInfo.phone}</td>
+                <!-- More than one phone number is setting here -->
+                <td valign="top">Phone:</td><td id="phone">
+                <c:forEach items = "${userInfo.phones}" var = "nextPhone">
+                  ${nextPhone}<br>
+                </c:forEach>
+                </td>
               </tr>
               <tr>
                 <td>
                   <button id="edit-button" class="ui-button">
                     Edit
+                  </button>
+                </td>
+                <td align="right">
+                  <button id="logout-button" class="ui-button">
+                    Logout
                   </button>
                 </td>
               </tr>
