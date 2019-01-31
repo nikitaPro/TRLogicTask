@@ -18,9 +18,9 @@ $(document).ready(function () {
             }
         }).html("This function will be implemented soon.");
     });
-    
+    console.log(parent.window.location);
     $("#logout-button").click(function(event) {
-        window.location.href = "/forTRLogic/logout";
+        window.location.href = "/logout";
     });
     
     /* Business content on left side */

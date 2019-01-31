@@ -154,7 +154,7 @@ function signUp() {
     
     /* ===== Validation part finish ===== */
     /* Sending user data on server */
-    $.get("/forTRLogic/signup", {
+    $.get("/signup", {
         name: nameVar,
         last_name: lastName,
         phone: phoneVar,
