@@ -75,6 +75,19 @@ function isPhoneValid(phone) {
     return true
 }
 
+function isPassValid(pass) {
+    if (pass.match(/[a-z]+/) == null || 
+            pass.match(/[A-Z]+/) == null ||
+            pass.match(/[0-9]+/) == null) {
+        errorDialog("Password", 
+                "Please, use lowercase, uppercase letters " +
+                "and numbers for your password.",
+                $('#pass'));
+        return false;
+    }
+    return true;
+}
+
 function isNameValid(fieldName, text, forFocus) {
     var err;
     var title = fieldName + " format";
@@ -103,6 +116,13 @@ function cleanSignUpForm() {
     $("#phone").val("");
     $("#pass").val("");
     $("#pass_2").val("");
+}
+
+function serverProblemError() {
+    errorDialog("Error", 
+            "We apologize, there are problems on the server, " +
+            "please try again later.", 
+            null);
 }
 
 function signUp() {
@@ -134,6 +154,10 @@ function signUp() {
     if (!isPhoneValid(phoneVar)) {
         return;
     }
+    if (!isPassValid(passVar)) {
+        return;
+    }
+    
     if (passVar.length < 8 || passVar.length > 20) {
         errorDialog("Password", 
                 "Password is invalid! Please, choose password in 8-20 length range.",
@@ -143,13 +167,6 @@ function signUp() {
     if (passVar != pass2Var){
         errorDialog("Password", "Passwords are not matching.", $("#pass_2"));
         return;
-    }
-    
-    function serverProblemError() {
-        errorDialog("Error", 
-                "We apologize, there are problems on the server, " +
-                "please try again later.", 
-                null);
     }
     
     /* ===== Validation part finish ===== */
